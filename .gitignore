@@ -1,0 +1,34 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+.env/
+
+# Packaging
+*.egg-info/
+dist/
+build/
+
+# Poetry / pip-tools
+poetry.lock
+
+# IDEs & editors
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Jupyter & VS Code checkpoints
+.ipynb_checkpoints/
+
+# Docker
+docker-compose.override.yml
+*.log
+
+# macOS / Windows noise
+.DS_Store
+Thumbs.db
