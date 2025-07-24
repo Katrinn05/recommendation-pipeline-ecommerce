@@ -1,0 +1,9 @@
+name: eventgen
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - kafka-python
+  - fastavro
+  - faker
+  - click
