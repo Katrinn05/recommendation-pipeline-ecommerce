@@ -10,7 +10,7 @@ This repository provides the infrastructure and tools to build a scalable recomm
 
 * Docker & Docker Compose (v2.0+)
 * Python 3.8+
-* pip (or pipenv/virtualenv)
+* Conda (Miniconda or Anaconda)
 
 ## Getting Started
 
@@ -35,10 +35,10 @@ This repository provides the infrastructure and tools to build a scalable recomm
 | Stage | Branch    | Description                                          |
 | ----- | --------- | ---------------------------------------------------- |
 | 0     | `main`    | Repository setup and foundational documentation      |
-| 1     | `Stage-1` | Messaging backbone & Event simulation                |
+| 1     | `stage-1-messaging` | Messaging backbone & Event simulation                |
 | 2     | `Stage-2` | Feature engineering & Feature store proof of concept |
 | 3     | `Stage-3` | Model training pipelines & Registry integration      |
 | 4     | `Stage-4` | Real-time serving & API development                  |
 | 5     | `Stage-5` | Observability, CI/CD, and monitoring                 |
 
-> **Note:** Detailed documentation for each stage is available in its respective branch (e.g., the `Stage-1` branch contains specific instructions and examples).
+> **Note:** Detailed documentation for each stage is available in its respective branch (e.g., the `stage-1-messaging` branch contains specific instructions and examples).
