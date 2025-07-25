@@ -2,12 +2,6 @@
 
 A production-grade, event-driven platform for ingesting, processing, and serving recommendations at scale.
 
-## Project Goals
-1. **High-throughput ingestion** of click-stream and catalog updates via Apache Kafka.  
-2. **Stream and batch feature computation** for real-time and offline models.  
-3. **Modular model registry and serving** so any team can plug in a recommender.  
-4. **Observability by design**—metrics, traces, and structured logs out of the box.
-
 ## Overview
 
 This repository provides the infrastructure and tools to build a scalable recommendation pipeline. Key stages include message ingestion via Kafka, feature engineering, model training, real-time serving, and observability.
@@ -41,9 +35,9 @@ This repository provides the infrastructure and tools to build a scalable recomm
 | Stage | Branch    | Description                                          |
 | ----- | --------- | ---------------------------------------------------- |
 | 0     | `main`    | Repository setup and foundational documentation      |
-| 1     | `Stage-1` | Messaging backbone & event simulation                |
-| 2     | `Stage-2` | Feature engineering & feature store proof of concept |
-| 3     | `Stage-3` | Model training pipelines & registry integration      |
+| 1     | `Stage-1` | Messaging backbone & Event simulation                |
+| 2     | `Stage-2` | Feature engineering & Feature store proof of concept |
+| 3     | `Stage-3` | Model training pipelines & Registry integration      |
 | 4     | `Stage-4` | Real-time serving & API development                  |
 | 5     | `Stage-5` | Observability, CI/CD, and monitoring                 |
 
