@@ -1,6 +1,6 @@
 {
   "type": "record",
-  "name": "ProductClick",
+  "name": "Purchase",
   "namespace": "com.example.events",
   "fields": [
     { "name": "user_id",    "type": "string" },

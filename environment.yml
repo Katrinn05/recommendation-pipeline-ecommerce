@@ -7,3 +7,5 @@ dependencies:
   - fastavro
   - faker
   - click
+  - pytest
+  - pytest-mock

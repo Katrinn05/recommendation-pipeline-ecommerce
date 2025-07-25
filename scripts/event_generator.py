@@ -1,39 +1,51 @@
-#!/usr/bin/env python3
 import time
 import json
 import click
+from io import BytesIO
 from kafka import KafkaProducer
 from kafka.errors import NoBrokersAvailable
-from fastavro import parse_schema, validate
+from fastavro import parse_schema, validate, schemaless_writer
 from faker import Faker
 
 
 @click.command()
 @click.option(
-    "--topic", "-t", default="product-clicks", help="Kafka topic to send events to"
-)
-@click.option("--rate", "-r", default=50, type=int, help="Events per second to produce")
-@click.option(
-    "--count", "-c", default=1000, type=int, help="Total number of events to generate"
+    "--topic", "-t",
+    default="product-clicks",
+    help="Kafka topic to send events to"
 )
 @click.option(
-    "--schema",
-    "-s",
+    '--interval', '-i',
+    default=1.0,
+    type=float,
+    help='Seconds to wait between events'
+)
+@click.option(
+    "--count", "-c",
+    default=1000,
+    type=int,
+    help="Total number of events to generate"
+)
+@click.option(
+    "--schema", "-s",
     default="schemas/product_clicks.avsc",
     help="Path to the Avro schema file",
 )
 @click.option(
-    "--bootstrap-server",
-    "-b",
+    '--key-field', '-k',
+    default='user_id',
+    help='Name of the field from the event to use as Kafka key'
+)
+@click.option(
+    "--bootstrap-server", "-b",
     default="localhost:9092",
     help="Address of the Kafka broker (host:port)",
 )
-def main(topic, rate, count, schema, bootstrap_server):
+def main(topic, interval, count, schema, key_field, bootstrap_server):
     """
     Simple CLI tool to generate fake events and publish them to Kafka.
     """
 
-    # Load and parse the Avro schema
     with open(schema, "r") as f:
         raw_schema = json.load(f)
     parsed_schema = parse_schema(raw_schema)
@@ -41,16 +53,15 @@ def main(topic, rate, count, schema, bootstrap_server):
     fake = Faker()
     sent = 0
 
-    # Create a Kafka producer with retry logic
     max_retries = 5
     for attempt in range(1, max_retries + 1):
         try:
             producer = KafkaProducer(
                 bootstrap_servers=bootstrap_server,
-                value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+                key_serializer=lambda k: str(k).encode('utf-8'),
                 linger_ms=5,
-                acks="all",
-                retries=3,
+                acks='all',
+                retries=3
             )
             break
         except NoBrokersAvailable:
@@ -62,31 +73,40 @@ def main(topic, rate, count, schema, bootstrap_server):
         )
         raise SystemExit(1)
 
-    # Generate and send events
     for _ in range(count):
-        # Create a single event matching the Avro schema
         event = {
             "user_id": fake.uuid4(),
             "product_id": fake.random_int(min=1, max=1000),
             "timestamp": int(time.time() * 1000),
         }
 
-        # Validate event against the parsed Avro schema
         if not validate(event, parsed_schema):
             raise ValueError(f"Event does not match schema: {event}")
 
-        # Send the event to Kafka (non-blocking)
-        producer.send(topic, value=event)
+        buffer = BytesIO()
+        schemaless_writer(buffer, parsed_schema, event)
+        avro_bytes = buffer.getvalue()
+
+        key_value = event.get(key_field)
+
+        if key_value is None:
+            raise KeyError(f"Field '{key_field}' not found in event: {event}")
+        
+        future = producer.send(topic, key=key_value, value=avro_bytes)
+        try:
+            future.get(timeout=10)
+        except KafkaError as e:
+            click.echo(f"Failed to send event: {e}", err=True)
+        
         sent += 1
 
-        # Throttle to achieve the desired rate
-        time.sleep(1.0 / rate)
+        time.sleep(interval)
 
-    # Ensure all buffered messages are sent before exiting
     producer.flush()
     producer.close()
 
-    click.echo(f"Successfully sent {sent} events to topic '{topic}'")
+    click.echo(f"Successfully sent {sent} events to topic '{topic}' "
+           f"with interval={interval}s and key-field='{key_field}'")
 
 
 if __name__ == "__main__":
