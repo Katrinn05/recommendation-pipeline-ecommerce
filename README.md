@@ -10,6 +10,10 @@ docker compose up -d
 # Boostrap topics
 make topics
 
+# Setup the Conda environment
+conda env create -f environment.yml
+conda activate recommendation-pipeline
+
 # Generate 500 cart-add events
 python3 scripts/event_generator.py \
   --topic cart-adds \
