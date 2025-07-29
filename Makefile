@@ -32,8 +32,7 @@ integration-test:
 	python3 scripts/event_generator.py \
 	  --schema cart_adds.avsc \
 	  --topic cart-adds \
-	  --count 10 \
-	  --bootstrap-servers localhost:9092
+	  --count 10
 	@echo "Running integration tests…"
 	pytest -m integration tests/integration -q
 
