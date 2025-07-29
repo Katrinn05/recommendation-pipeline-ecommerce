@@ -13,7 +13,8 @@ jobs:
     services:
       docker:
         image: docker:24-dind
-        privileged: true
+        options: >-
+          --privileged
 
     steps:
       - name: Checkout repository
