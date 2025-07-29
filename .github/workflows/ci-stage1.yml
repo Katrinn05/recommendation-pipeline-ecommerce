@@ -42,10 +42,10 @@ jobs:
         run: make create-topics
 
       - name: Run unit tests
-        run: make unit-test                  
+        run: conda run -n reco-pipeline make unit-test                  
 
       - name: Run integration tests
-        run: make integration-test           
+        run: conda run -n reco-pipeline make integration-test           
 
       - name: Shutdown Docker Compose
         if: always()
