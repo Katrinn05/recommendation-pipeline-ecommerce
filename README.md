@@ -4,8 +4,13 @@ This branch focuses on setting up the Kafka messaging backbone and generating sy
 
 **Quickstart:**
 ```bash
+# Start Kafka
 docker compose up -d
+
+# Boostrap topics
 make topics
+
+# Generate 500 cart-add events
 python3 scripts/event_generator.py \
   --topic cart-adds \
   --schema schemas/cart_adds.avsc \
