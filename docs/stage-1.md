@@ -181,22 +181,22 @@ python3 event_generator.py \
    ```
 4. **Testing commands**
 
-  ```bash
-  # Run unit tests only (fast)
-  make unit-test
+	```bash
+	# Run unit tests only (fast)
+	make unit-test
 
-  # Run integration tests (requires Kafka up & topics created)
-  make create-topics
-  make integration-test
+	# Run integration tests (requires Kafka up & topics created)
+	make create-topics
+	make integration-test
 
-  # Run all tests
-  make test
-  ```
+	# Run all tests
+	make test
+	```
 5. **Smoke test** (manual)
 
-  ```bash
-  make smoke
-  ```
+	```bash
+	make smoke
+	```
 
 Successful output confirms end-to-end messaging simulation.
 
