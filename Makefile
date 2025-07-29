@@ -30,7 +30,7 @@ unit-test:
 integration-test:
 	@echo "Generating test messages in Kafka…"
 	python3 scripts/event_generator.py \
-	  --schema cart_adds.avsc \
+	  --schema schemas/cart_adds.avsc \
 	  --topic cart-adds \
 	  --count 10
 	@echo "Running integration tests…"
