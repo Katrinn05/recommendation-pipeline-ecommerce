@@ -147,6 +147,14 @@ python3 scripts/event_generator.py \
 * `--count` (`-c`): total messages to send (default `100`).
 * `--bootstrap-server` (`-b`): Kafka broker address (default `localhost:9092`).
 
+Or use the provided Makefile targets for quick generation:
+
+```bash
+make gen-clicks      # product-clicks events
+make gen-cart        # cart-adds events
+make gen-purchases   # purchases events
+```
+
 **Example:**
 
 ```bash
