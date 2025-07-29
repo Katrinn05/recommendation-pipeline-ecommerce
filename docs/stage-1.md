@@ -85,7 +85,7 @@ Run:
 make topics
 ```
 
-to bootstrap and verify at once.
+to create and list topics in one command.
 
 ---
 
@@ -108,8 +108,8 @@ Example: `schemas/product_clicks.avsc`
   "namespace": "com.example.events",
   "fields": [
     {"name": "user_id", "type": "string"},
-    {"name": "product_id", "type": "string"},
-    {"name": "timestamp", "type": {"type": "long", "logicalType": "timestamp-millis"}}
+    {"name": "product_id", "type": "int"},
+    {"name": "timestamp",  "type": "long"}
   ]
 }
 ```
@@ -120,7 +120,7 @@ Example: `schemas/product_clicks.avsc`
 
 `event_generator.py` publishes synthetic messages to a Kafka topic using Avro.
 
-### Installation
+### Setup
 
 ```bash
 # create & activate the Conda environment
@@ -136,14 +136,16 @@ python3 event_generator.py \
   --schema schemas/<schema-file>.avsc \
   --key-field <field> \
   --interval <seconds> \
-  --count <number>
+  --count <number> \
+  --bootstrap-server localhost:9092
 ```
 
 * `--topic` (`-t`): destination topic.
 * `--schema` (`-s`): path to Avro schema.
-* `--key-field` (`-k`): message key field.
+* `--key-field` (`-k`): message key field (default `user_id`).
 * `--interval` (`-i`): delay between messages (default `1.0`).
 * `--count` (`-c`): total messages to send (default `100`).
+* `--bootstrap-server` (`-b`): Kafka broker address (default `localhost:9092`).
 
 **Example:**
 
@@ -177,6 +179,24 @@ python3 event_generator.py \
      --bootstrap-server localhost:9092 \
      --topic cart-adds --from-beginning
    ```
+4. **Testing commands**
+
+  ```bash
+  # Run unit tests only (fast)
+  make unit-test
+
+  # Run integration tests (requires Kafka up & topics created)
+  make create-topics
+  make integration-test
+
+  # Run all tests
+  make test
+  ```
+5. **Smoke test** (manual)
+
+  ```bash
+  make smoke
+  ```
 
 Successful output confirms end-to-end messaging simulation.
 

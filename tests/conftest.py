@@ -1,10 +1,10 @@
 import json
 import os
-import sys
 from pathlib import Path
-
 import pytest
 from fastavro import parse_schema
+import sys, types
+from unittest.mock import Mock
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 SCRIPTS_DIR = ROOT_DIR / "scripts"
@@ -30,3 +30,9 @@ def product_clicks_schema():
 def purchases_schema():
     with open(SCHEMA_DIR / "purchases.avsc") as f:
         return parse_schema(json.load(f))
+    
+@pytest.fixture(autouse=True)
+def _patch_sleep(monkeypatch):
+    monkeypatch.setattr("time.sleep", lambda *_: None)
+
+

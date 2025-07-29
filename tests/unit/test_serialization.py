@@ -10,7 +10,7 @@ from event_generator import main
 def test_send_receives_avro_bytes(cart_schema, mocker):
     """Producer.send must receive binary Avro encoded value and correct key."""
     fake_producer = mocker.Mock()
-    mocker.patch("event_generator.KafkaProducer", return_value=fake_producer)
+    mocker.patch("kafka.KafkaProducer", return_value=fake_producer)
 
     runner = CliRunner()
     result = runner.invoke(

@@ -7,7 +7,7 @@ from event_generator import main
 def test_wrong_key_field_raises(mocker):
     """Unknown --key-field should raise KeyError inside script."""
 
-    mocker.patch("event_generator.KafkaProducer")
+    mocker.patch("kafka.KafkaProducer")
 
     runner = CliRunner()
     result = runner.invoke(

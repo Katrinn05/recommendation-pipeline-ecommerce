@@ -8,7 +8,7 @@ from event_generator import main
 
 def test_interval_sleep_called_exact_number_of_times(mocker):
     """time.sleep must be called count times with exact interval."""
-    mocker.patch("event_generator.KafkaProducer")          # no real Kafka
+    mocker.patch("kafka.KafkaProducer")
     mocked_sleep = mocker.patch("event_generator.time.sleep")
 
     runner = CliRunner()
