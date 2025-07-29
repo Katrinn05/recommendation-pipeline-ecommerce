@@ -131,7 +131,7 @@ conda activate recommendation-pipeline
 ### Usage
 
 ```bash
-python3 event_generator.py \
+python3 scripts/event_generator.py \
   --topic <topic-name> \
   --schema schemas/<schema-file>.avsc \
   --key-field <field> \
