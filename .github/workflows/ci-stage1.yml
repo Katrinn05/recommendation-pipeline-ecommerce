@@ -1,0 +1,51 @@
+# .github/workflows/ci-stage1.yml
+name: CI Stage 1 (Conda)
+
+on:
+  push:
+    branches: [ stage-1-messaging ]
+  pull_request:
+    branches: [ stage-1-messaging ]
+
+jobs:
+  test-stage-1:
+    runs-on: ubuntu-latest
+    services:
+      docker:
+        image: docker:24-dind
+        privileged: true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-activate-base: false
+          python-version: 3.12                   
+          environment-file: environment.yml     
+          activate-environment: reco-pipeline         
+
+      - name: Verify environment
+        run: conda list                      
+
+      - name: Start Kafka Broker via Docker Compose
+        run: |
+          docker compose up -d
+
+      - name: Wait for Kafka to be ready
+        run: sleep 15                        
+
+      - name: Bootstrap topics
+        run: make create-topics
+
+      - name: Run unit tests
+        run: make unit-test                  
+
+      - name: Run integration tests
+        run: make integration-test           
+
+      - name: Shutdown Docker Compose
+        if: always()
+        run: docker compose down -v
