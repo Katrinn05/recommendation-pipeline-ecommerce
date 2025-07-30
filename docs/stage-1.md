@@ -24,7 +24,7 @@ In Stage 1, I establish the Kafka-based messaging backbone and provide tools to
 Clone the repository and switch to the `stage-1-messaging` branch:
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/Katrinn05/recommendation-pipeline-ecommerce.git
 cd recommendation-pipeline-ecommerce
 git checkout stage-1-messaging
 ```
