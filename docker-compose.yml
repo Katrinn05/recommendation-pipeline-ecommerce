@@ -1,6 +1,6 @@
 services:
   kafka:
-    image: confluentinc/cp-kafka:latest
+    image: confluentinc/cp-kafka:7.5.0
     container_name: kafka
     ports:
       - "9092:9092"
@@ -21,6 +21,29 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
       KAFKA_LOG_DIRS: "/var/lib/kafka/data"
       CLUSTER_ID: "L_nCkqU-RCeQAmGN4g9hcw"
+  feast:
+    image: feastdev/feast-core:0.44.0
+    ports: ["6565:6565"]
+    depends_on: [redis, postgres]
+    networks: ["featnet"]
+
+  redis:
+    image: redis:7
+    ports: ["6379:6379"]
+    networks: ["featnet"]
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: "feast"
+      POSTGRES_PASSWORD: "feast"
+      POSTGRES_DB: "feast"
+    ports: ["5432:5432"]
+    networks: ["featnet"]
+
+networks:
+  featnet:
+    driver: bridge
 
 volumes:
   kafka-data:
