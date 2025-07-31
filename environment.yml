@@ -16,4 +16,4 @@ dependencies:
   - ruff
   - pip
   - pip:
-      - feast==0.44.0 
+      - "feast[postgres]==0.44.0"

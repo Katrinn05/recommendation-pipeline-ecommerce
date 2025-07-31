@@ -21,11 +21,6 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
       KAFKA_LOG_DIRS: "/var/lib/kafka/data"
       CLUSTER_ID: "L_nCkqU-RCeQAmGN4g9hcw"
-  feast:
-    image: feastdev/feast-core:0.44.0
-    ports: ["6565:6565"]
-    depends_on: [redis, postgres]
-    networks: ["featnet"]
 
   redis:
     image: redis:7

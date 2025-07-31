@@ -1,0 +1,21 @@
+
+c
+D
+user_idUnique identifier for each user"user_idJreco_pipeline
+ÄÙ®Ä¨„äÚ†ó®ÄÀ¼ûp
+C
+$
+__dummy"
+__dummy_idJreco_pipeline
+ÄÙ®ÄÈµŞÚ†ó®Äğ‚‰q1"$bdf5ae57-de58-475b-b88f-52fedcce3523*Šó®Äˆ™×*2Õ
+
+user_daily_featuresreco_pipelineuser_id"H
+click_count_24h"3Number of product click events in the last 24 hours"I
+cart_add_count_24h"1Number of add-to-cart events in the last 24 hours"F
+purchase_count_24h".Number of purchase events in the last 24 hours2€š:|event_timestamp*ingestion_timeZ../data/offlineŠ1feast.infra.offline_stores.file_source.FileSource¢../data/offline@b
+user_id2
+ÄÙ®ÄÈĞÚŠó®ÄŞÍ*
+ŠÙÃĞÇçˆó®ÄbŒevent_timestamp*ingestion_timeZ../data/offlineŠ1feast.infra.offline_stores.file_source.FileSource¢../data/offlineªreco_pipelineŠ.
+
+reco_pipeline
+ÄÙ®Ä¸’©Ù†ó®ÄĞo

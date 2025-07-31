@@ -1,0 +1,10 @@
+{
+  "type": "record",
+  "name": "CartAdd",
+  "namespace": "com.example.events",
+  "fields": [
+    { "name": "user_id",    "type": "string" },
+    { "name": "product_id", "type": "int"    },
+    { "name": "timestamp",  "type": "long"   }
+  ]
+}
