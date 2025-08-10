@@ -1,7 +1,7 @@
 .PHONY: pip-reqs create-topics list-topics topics gen-clicks gen-cart gen-purchases stage2-run stage2-stop stage2-clean features-stream feast-apply feast-mat unit-test integration-test test
 
 pip-reqs:
-	pip freeze --local > requirements.txt
+	pip list --format=freeze > requirements.txt
 
 create-topics:
 	for TOPIC in product-clicks cart-adds purchases; do \
