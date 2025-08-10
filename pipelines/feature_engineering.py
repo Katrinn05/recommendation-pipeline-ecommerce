@@ -13,7 +13,7 @@ for a feature store (e.g., Feast).
 import json
 import os
 from io import BytesIO
-from datetime import datetime
+from datetime import datetime, timezone
 from collections import defaultdict
 
 from kafka import KafkaConsumer
@@ -57,9 +57,9 @@ def flush(aggregates: dict, output_root: str = "data/offline") -> None:
             "cart_add_count_24h": counts["carts"],
             "purchase_count_24h": counts["purchases"],
             # event_timestamp marks when the aggregation is computed; using UTC now
-            "event_timestamp": datetime.utcnow(),
+            "event_timestamp": datetime.now(timezone.utc),
             # ingestion_time marks when the record was written to storage
-            "ingestion_time": datetime.utcnow(),
+            "ingestion_time": datetime.now(timezone.utc),
         })
     if not rows:
         return
