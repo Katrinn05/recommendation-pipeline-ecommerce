@@ -47,7 +47,7 @@ unit-test:
 	PYTHONPATH=. pytest -q -k 'avro or aggregation'
 
 integration-test:
-	PYTHONPATH=. pytest -q -m integration; \
+	RUN_INTEGRATION=1 PYTHONPATH=. pytest -q -m integration; \
 	code=$$?; \
 	if [ $$code -ne 0 ] && [ $$code -ne 5 ]; then exit $$code; fi
 

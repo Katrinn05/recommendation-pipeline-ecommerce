@@ -12,12 +12,24 @@ for a feature store (e.g., Feast).
 """
 import json
 import os
+import argparse
+import logging
+import signal
 from io import BytesIO
 from datetime import datetime, timezone
 from collections import defaultdict
 
 from kafka import KafkaConsumer
 from fastavro import parse_schema, schemaless_reader
+
+def parse_args():
+    p = argparse.ArgumentParser(description="Streaming feature engineering")
+    p.add_argument("--bootstrap-server", default="localhost:9092")
+    p.add_argument("--output-dir", default="data/offline")
+    p.add_argument("--flush-every", type=int, default=10_000)
+    p.add_argument("--max-messages", type=int, default=0, help="0 means unlimited")
+    p.add_argument("--log-level", default="INFO")
+    return p.parse_args()
 
 # Mapping of Kafka topics to their respective Avro schema files.
 SCHEMA_PATHS = {
@@ -69,7 +81,6 @@ def flush(aggregates: dict, output_root: str = "data/offline") -> None:
         partition_path = os.path.join(output_root, f"partition_date={date_str}")
         os.makedirs(partition_path, exist_ok=True)
         file_path = os.path.join(partition_path, "user_daily_features.parquet")
-        # Write Parquet; for simplicity overwrite existing file
         group.to_parquet(
             file_path,
             index=False,
@@ -78,35 +89,42 @@ def flush(aggregates: dict, output_root: str = "data/offline") -> None:
         )
 
 def main() -> None:
-    # Load schemas once at startup
+    args = parse_args()
+    logging.basicConfig(level=getattr(logging, args.log_level.upper(), logging.INFO),
+                        format="%(asctime)s %(levelname)s %(message)s")
     schemas = load_schemas()
 
-    # Create a Kafka consumer for all topics.  auto_offset_reset="earliest"
-    # allows replaying events from the beginning for offline backfilling.
     consumer = KafkaConsumer(
         *SCHEMA_PATHS.keys(),
         bootstrap_servers="localhost:9092",
         auto_offset_reset="earliest",
         enable_auto_commit=False,
+        consumer_timeout_ms=1000,
     )
 
-    # Aggregates keyed by (user_id, date_str)
-    aggregates: dict[tuple[str, str], dict[str, int]] = defaultdict(
-        lambda: {"clicks": 0, "carts": 0, "purchases": 0}
-    )
+    stop = {"value": False}
+    def _graceful(*_):
+        stop["value"] = True
+    signal.signal(signal.SIGINT, _graceful)
+    if hasattr(signal, "SIGTERM"):
+        signal.signal(signal.SIGTERM, _graceful)
 
+    aggregates = defaultdict(lambda: {"clicks": 0, "carts": 0, "purchases": 0})
     message_counter = 0
+
     try:
         for msg in consumer:
-            schema = schemas[msg.topic]
-            record = decode_avro(msg.value, schema)
-            user_id: str = record["user_id"]
-            # Convert millisecond timestamp to date string (YYYY-MM-DD)
+            try:
+                record = decode_avro(msg.value, schemas[msg.topic])
+            except Exception as e:
+                logging.warning("avro_decode_error topic=%s err=%s", msg.topic, e)
+                continue
+
+            user_id = record["user_id"]
             event_time = datetime.fromtimestamp(record["timestamp"] / 1000.0)
             date_str = event_time.strftime("%Y-%m-%d")
             key = (user_id, date_str)
 
-            # Increment appropriate counter based on topic
             if msg.topic == "product-clicks":
                 aggregates[key]["clicks"] += 1
             elif msg.topic == "cart-adds":
@@ -115,16 +133,15 @@ def main() -> None:
                 aggregates[key]["purchases"] += 1
 
             message_counter += 1
-            # Flush aggregated data to disk every 10 000 messages to limit memory usage
-            if message_counter % 10000 == 0:
-                flush(aggregates)
+            if message_counter % args.flush_every == 0:
+                flush(aggregates, output_root=args.output_dir)
                 aggregates.clear()
+                logging.info("flushed count=%d", message_counter)
 
-    except KeyboardInterrupt:
-        # Graceful shutdown on Ctrl+C
-        pass
+            if stop["value"] or (args.max_messages and message_counter >= args.max_messages):
+                break
     finally:
-        flush(aggregates)
+        flush(aggregates, output_root=args.output_dir)
         consumer.close()
 
 if __name__ == "__main__":
