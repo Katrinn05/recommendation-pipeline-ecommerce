@@ -37,7 +37,7 @@ This repository provides the infrastructure and tools to build a scalable recomm
 | 0     | `main`    | Repository setup and foundational documentation      |
 | 1     | `stage-1-messaging` | Messaging backbone & Event simulation                |
 | 2     | `stage-2-feature` | Feature engineering & Feature store proof of concept |
-| 3     | `Stage-3` | Model training pipelines & Registry integration      |
+| 3     | `stage-3-model` | Model training pipelines & Registry integration      |
 | 4     | `Stage-4` | Real-time serving & API development                  |
 | 5     | `Stage-5` | Observability, CI/CD, and monitoring                 |
 
