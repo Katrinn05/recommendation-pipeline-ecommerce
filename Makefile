@@ -1,54 +1,81 @@
-.PHONY: pip-reqs create-topics list-topics topics gen-clicks gen-cart gen-purchases stage2-run stage2-stop stage2-clean features-stream feast-apply feast-mat unit-test integration-test test
+# ===== Variables =====
+PY ?= python3
+BOOTSTRAP ?= localhost:9092
+COUNT ?= 1000
+INTERVAL ?= 0.5
+NUM_USERS ?= 500
+NUM_PRODUCTS ?= 1000
+USER_SHAPE ?= 2.0
+PRODUCT_SHAPE ?= 2.5
+SEED ?= 42
 
-pip-reqs:
-	pip list --format=freeze > requirements.txt
+# ===== Stage 1 — Event Generation =====
+.PHONY: gen-clicks gen-cart gen-purchase gen-events
 
-create-topics:
-	for TOPIC in product-clicks cart-adds purchases; do \
-	  docker exec kafka kafka-topics \
-	    --create --if-not-exists \
-	    --bootstrap-server localhost:9092 \
-	    --replication-factor 1 \
-	    --partitions 3 \
-	    --topic "$$TOPIC"; \
-	done
+gen-clicks: ## generate product-clicks with realistic distributions
+	$(PY) scripts/event_generator.py \
+	  --topic product-clicks \
+	  --schema schemas/product_clicks.avsc \
+	  --count $(COUNT) \
+	  --interval $(INTERVAL) \
+	  --num-users $(NUM_USERS) \
+	  --num-products $(NUM_PRODUCTS) \
+	  --user-shape $(USER_SHAPE) \
+	  --product-shape $(PRODUCT_SHAPE) \
+	  --seed $(SEED) \
+	  --bootstrap-server $(BOOTSTRAP)
 
-list-topics:
-	docker exec kafka kafka-topics --bootstrap-server localhost:9092 --list
-
-topics: create-topics list-topics
-
-gen-clicks:
-	python3 scripts/event_generator.py -t product-clicks -s schemas/product_clicks.avsc -k user_id -i 0.5 -c 500
 gen-cart:
-	python3 scripts/event_generator.py -t cart-adds -s schemas/cart_adds.avsc -k user_id -i 1.0 -c 200
-gen-purchases:
-	python3 scripts/event_generator.py -t purchases -s schemas/purchases.avsc -k user_id -i 2.0 -c 100
+	$(PY) scripts/event_generator.py \
+	  --topic cart-adds \
+	  --schema schemas/cart_adds.avsc \
+	  --count $(COUNT) \
+	  --interval $(INTERVAL) \
+	  --num-users $(NUM_USERS) \
+	  --num-products $(NUM_PRODUCTS) \
+	  --user-shape $(USER_SHAPE) \
+	  --product-shape $(PRODUCT_SHAPE) \
+	  --seed $(SEED) \
+	  --bootstrap-server $(BOOTSTRAP)
 
-stage2-run:
-	docker compose up -d
+gen-purchase:
+	$(PY) scripts/event_generator.py \
+	  --topic purchases \
+	  --schema schemas/purchases.avsc \
+	  --count $(COUNT) \
+	  --interval $(INTERVAL) \
+	  --num-users $(NUM_USERS) \
+	  --num-products $(NUM_PRODUCTS) \
+	  --user-shape $(USER_SHAPE) \
+	  --product-shape $(PRODUCT_SHAPE) \
+	  --seed $(SEED) \
+	  --bootstrap-server $(BOOTSTRAP)
 
-stage2-stop:
-	docker compose down -v
+gen-events: gen-clicks gen-cart gen-purchase ## generate all topics
 
-stage2-clean:
-	rm -rf data/offline/partition_date=*
+# ===== Stage 2 — Feature Streaming =====
+.PHONY: features-stream
 
-features-stream:
-	python3 pipelines/feature_engineering.py
+features-stream: ## run streaming feature engineering
+	$(PY) pipelines/feature_engineering.py \
+	  --bootstrap-server $(BOOTSTRAP) \
+	  --output-dir data/offline \
+	  --flush-every 10000 \
+	  --flush-seconds 60 \
+	  --log-level INFO
 
-feast-apply:
-	cd feature_repo && feast apply
+# ===== Tests =====
+.PHONY: unit-test integration-test test
 
-feast-mat:
-	cd feature_repo && feast materialize-incremental `date -u +%Y-%m-%dT%H:%M:%SZ`
+unit-test: ## run unit tests
+	pytest -q tests/unit
 
-unit-test:
-	PYTHONPATH=. pytest -q -k 'avro or aggregation'
+integration-test: ## run integration tests
+	pytest -q tests/integration -m kafka --bootstrap $(BOOTSTRAP)
 
-integration-test:
-	RUN_INTEGRATION=1 PYTHONPATH=. pytest -q -m integration; \
-	code=$$?; \
-	if [ $$code -ne 0 ] && [ $$code -ne 5 ]; then exit $$code; fi
+test: unit-test integration-test ## run all tests
 
-test: unit-test integration-test
+# ===== Utilities =====
+.PHONY: help
+help:
+	@grep -E '^[a-zA-Z0-9_\-]+:.*?## ' $(MAKEFILE_LIST) | awk -F':.*?## ' '{printf "\033[36m%-22s\033[0m %s\n", $$1, $$2}'

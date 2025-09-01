@@ -48,6 +48,10 @@ user_daily_features = FeatureView(
             dtype=Int64,
             description="Number of purchase events in the last 24 hours",
         ),
+        Field(
+            name="distinct_products_24h", 
+            dtype=Int64, 
+            description="Unique products touched in last day"),
     ],
     online=True,
     source=user_daily_source,
