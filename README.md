@@ -12,7 +12,7 @@ make topics
 
 # Setup the Conda environment
 conda env create -f environment.yml
-conda activate evevntgen
+conda activate eventgen
 
 # Generate 500 cart-add events
 python3 scripts/event_generator.py \
